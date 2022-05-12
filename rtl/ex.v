@@ -1,0 +1,67 @@
+`include "defines.v"
+module ex (
+    // from id_ex
+    input [31:0]    inst_i,
+    input [31:0]    inst_addr_i,
+    input [31:0]    rs1_data_i,
+    input [31:0]    rs2_data_i,
+    input [4:0]     rd_addr_i,
+    input wire      rd_wen_i,
+    // to regs
+    output reg[4:0]    rd_addr_o,
+    output reg[31:0]   rd_data_o,
+    output reg         rd_wen_o
+);
+    wire [6:0] opcode;
+    wire [4:0] rd;
+    wire [2:0] func3;
+    wire [4:0] rs1;
+    wire [4:0] rs2;
+    wire [6:0] func7;
+    assign {func7, rs2, rs1, func3, rd, opcode} = inst_i;
+
+  always @(*) begin
+      case(opcode)
+        `INST_TYPE_I: begin
+            case (func3)
+                `INST_ADDI: begin
+                    rd_addr_o = rd_addr_i;
+                    rd_data_o = rs1_data_i + rs2_data_i;
+                    rd_wen_o = rd_wen_i;
+                end
+                default: begin
+                    rd_addr_o = 'b0;
+                    rd_data_o = 'b0;
+                    rd_wen_o = 'b0;
+                end
+            endcase
+        end
+        `INST_TYPE_R_M: begin
+            case (func3)
+                `INST_ADD_SUB: begin
+                    if(func7 == 7'b000_0000) begin
+                        rd_data_o = rs1_data_i + rs2_data_i;
+                        rd_addr_o = rd_addr_i;
+                        rd_wen_o = rd_wen_i;
+                    end
+                    else if(func7 == 7'b010_0000) begin
+                        rd_data_o = rs2_data_i - rs1_data_i;
+                        rd_addr_o = rd_addr_i;
+                        rd_wen_o = rd_wen_i;
+                    end
+                end 
+                default: begin
+                    rd_addr_o = 'b0;
+                    rd_data_o = 'b0;
+                    rd_wen_o = 'b0;
+                end
+            endcase
+        end 
+        default: begin
+            rd_addr_o = 'b0;
+            rd_data_o = 'b0;
+            rd_wen_o = 'b0;
+        end
+      endcase
+  end
+endmodule //ex

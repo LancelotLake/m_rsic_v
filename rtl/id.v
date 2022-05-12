@@ -1,21 +1,22 @@
-`include "define.v"
+`include "defines.v"
 module id (
     // from if_id
     input [31:0]    inst_addr_i,
     input [31:0]    inst_i,
     // to regs
-    output [31:0]   rs1_addr_o,
-    output [31:0]   rs2_addr_o,
+    output reg[4:0]   rs1_addr_o,
+    output reg[4:0]   rs2_addr_o,
     // from regs
     input [31:0]    rs1_data_i,
     input [31:0]    rs2_data_i,
     // to id_ex 
-    output [31:0]   inst_addr_o,
-    output [31:0]   inst_o,
-    output [31:0]   op_1_o,
-    output [31:0]   op_2_o,
-    output [4:0]    wd_addr_o,
-    output reg      reg_wen    
+    output wire[31:0]   inst_addr_o,
+    output wire[31:0]   inst_o,
+
+    output reg[31:0]    op_1_o,
+    output reg[31:0]    op_2_o,
+    output reg[4:0]     wd_addr_o,
+    output reg          reg_wen    
 );
     assign inst_addr_o = inst_addr_i;
     assign inst_o = inst_i;
@@ -34,12 +35,16 @@ module id (
          `INST_TYPE_I:begin
              case (func3)
                 `INST_ADDI: begin
+                    rs1_addr_o  = rs1;
+                    rs2_addr_o  = 'b0;
                     op_1_o      = rs1_data_i;
                     op_2_o      = {{20{func7[6]}}, func7, rs2};
                     wd_addr_o   = rd;
                     reg_wen     = 1'b1;
                 end
                 default: begin
+                    rs1_addr_o  = 'b0;
+                    rs2_addr_o  = 'b0;
                     op_1_o      = 32'b0;
                     op_2_o      = 32'b0;
                     wd_addr_o   = 5'b0;
@@ -51,12 +56,16 @@ module id (
          `INST_TYPE_R_M: begin
              case (func3)
                 `INST_ADD_SUB: begin
+                    rs1_addr_o  = rs1;
+                    rs2_addr_o  = rs2;
                     op_1_o      = rs1_data_i;
                     op_2_o      = rs2_data_i;
                     wd_addr_o   = rd;
                     reg_wen     = 1'b1;
                 end  
                 default: begin
+                    rs1_addr_o  = 'b0;
+                    rs2_addr_o  = 'b0;
                     op_1_o      = 32'b0;
                     op_2_o      = 32'b0;
                     wd_addr_o   = 5'b0;
@@ -65,6 +74,8 @@ module id (
              endcase
          end
         default: begin
+            rs1_addr_o  = 'b0;
+            rs2_addr_o  = 'b0;
             op_1_o      = 32'b0;
             op_2_o      = 32'b0;
             wd_addr_o   = 5'b0;

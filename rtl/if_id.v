@@ -1,4 +1,4 @@
-`include "./defines.v"
+`include "defines.v"
 module if_id (
     input clk,
     input rst_n,
@@ -6,8 +6,8 @@ module if_id (
     input [31:0] inst_i,
     input [31:0] inst_addr_i,
     
-    output [31:0] inst_o,
-    output [31:0] inst_addr_o
+    output reg [31:0] inst_o,
+    output reg [31:0] inst_addr_o
 );
   always @(posedge clk) begin
       if(!rst_n) begin
