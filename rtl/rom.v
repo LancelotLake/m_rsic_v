@@ -1,3 +1,4 @@
+`include "defines.v"
 module rom (
     input [31:0] inst_addr_i,
     output [31:0] inst_o

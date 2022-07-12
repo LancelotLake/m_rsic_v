@@ -8,7 +8,8 @@ module id_ex (
     input [31:0]   rs2_data_i,
     input [4:0]    wd_addr_i,
     input wire     rd_wen_i,
-
+    // from ctrl
+    input wire     hold_flag_i,
     // to ex
     output reg [31:0]   inst_addr_o,
     output reg [31:0]   inst_o,
@@ -16,11 +17,12 @@ module id_ex (
     output reg [31:0]   rs2_data_o,
     output reg [4:0]    rd_addr_o,
     output reg          rd_wen_o
+    
 );
   always @(posedge clk) begin
-      if(!rst_n) begin
+      if(!rst_n || hold_flag_i) begin
             inst_addr_o     <= 32'b0;
-            inst_o          <= 32'b0;
+            inst_o          <= `INST_NOP;
             rs1_data_o      <= 32'b0;
             rs2_data_o      <= 32'b0;
             rd_addr_o       <= 5'b0;

@@ -42,6 +42,7 @@ module id (
                     wd_addr_o   = rd;
                     reg_wen     = 1'b1;
                 end
+                
                 default: begin
                     rs1_addr_o  = 'b0;
                     rs2_addr_o  = 'b0;
@@ -72,6 +73,44 @@ module id (
                     reg_wen     = 1'b0;
                 end 
              endcase
+         end
+         // B型指令
+         `INST_TYPE_B: begin
+            case(func3)
+            // imm[12][10:5] | rs2 | rs1 | 001 | imm[4:1][11] | 1100011
+                `INST_BNE, `INST_BEQ: begin
+                    rs1_addr_o  = rs1;
+                    rs2_addr_o  = rs2;
+                    op_1_o      = rs1_data_i;
+                    op_2_o      = rs2_data_i;
+                    wd_addr_o   = 5'b0;
+                    reg_wen     = 1'b0;
+                end
+                default: begin
+                    rs1_addr_o  = 'b0;
+                    rs2_addr_o  = 'b0;
+                    op_1_o      = 32'b0;
+                    op_2_o      = 32'b0;
+                    wd_addr_o   = 5'b0;
+                    reg_wen     = 1'b0;
+                end
+            endcase
+         end
+         `INST_LUI: begin
+            rs1_addr_o  = 'b0;
+            rs2_addr_o  = 'b0;
+            op_1_o      = {inst_i[31:12],12'b0};
+            op_2_o      = 32'b0;
+            wd_addr_o   = rd;
+            reg_wen     = 1'b1;
+        end
+         `INST_JAL: begin
+            rs1_addr_o  = 'b0;
+            rs2_addr_o  = 'b0;
+            op_1_o      = {{12{inst_i[31]}}, inst_i[19:12], inst_i[20], inst_i[30:21], 1'b0};
+            op_2_o      = 32'b0;
+            wd_addr_o   = rd;
+            reg_wen     = 1'b1;
          end
         default: begin
             rs1_addr_o  = 'b0;
