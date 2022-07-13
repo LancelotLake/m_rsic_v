@@ -110,6 +110,45 @@ module ex (
                         rd_wen_o = rd_wen_i;
                     end
                 end 
+                `INST_SLL: begin
+                    rd_data_o = rs1_data_i << rs2_data_i;
+                    rd_addr_o = rd_addr_i;
+                    rd_wen_o = rd_wen_i;
+                end
+                `INST_SLT: begin
+                    rd_data_o = op1_i_less_than_op2_i_signed;
+                    rd_addr_o = rd_addr_i;
+                    rd_wen_o = rd_wen_i;
+                end
+                `INST_SLTU: begin
+                    rd_data_o = op1_i_less_than_op2_i_unsigned;
+                    rd_addr_o = rd_addr_i;
+                    rd_wen_o = rd_wen_i;
+                end
+                `INST_XOR: begin
+                    rd_data_o = rs2_data_i ^ rs1_data_i;
+                    rd_addr_o = rd_addr_i;
+                    rd_wen_o = rd_wen_i;
+                end
+                `INST_SR: begin
+                    rd_addr_o = rd_addr_i;
+                    rd_wen_o = rd_wen_i;
+                    if(func7 == 7'b010_0000) begin
+                        rd_data_o = $signed(rs1_data_i) >>> rs2_data_i;
+                    end else begin
+                        rd_data_o = rs1_data_i >> rs2_data_i;
+                    end
+                end
+                `INST_OR: begin
+                    rd_data_o = rs2_data_i | rs1_data_i;
+                    rd_addr_o = rd_addr_i;
+                    rd_wen_o = rd_wen_i;
+                end
+                `INST_AND: begin
+                    rd_data_o = rs2_data_i & rs1_data_i;
+                    rd_addr_o = rd_addr_i;
+                    rd_wen_o = rd_wen_i;
+                end
                 default: begin
                     rd_addr_o = 'b0;
                     rd_data_o = 'b0;

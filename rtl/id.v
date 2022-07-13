@@ -63,14 +63,14 @@ module id (
          // R型命令
          `INST_TYPE_R_M: begin
              case (func3)
-                `INST_ADD_SUB: begin
+                `INST_ADD_SUB, `INST_SLL, `INST_SLT, `INST_SLTU, `INST_XOR, `INST_SR, `INST_OR, `INST_AND: begin
                     rs1_addr_o  = rs1;
                     rs2_addr_o  = rs2;
                     op_1_o      = rs1_data_i;
                     op_2_o      = rs2_data_i;
                     wd_addr_o   = rd;
                     reg_wen     = 1'b1;
-                end  
+                end   
                 default: begin
                     rs1_addr_o  = 'b0;
                     rs2_addr_o  = 'b0;
