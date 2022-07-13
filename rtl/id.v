@@ -34,7 +34,7 @@ module id (
         // I型命令
          `INST_TYPE_I:begin
              case (func3)
-                `INST_ADDI: begin
+                `INST_ADDI, `INST_SLTI, `INST_SLTIU, `INST_XORI, `INST_ORI, `INST_ANDI: begin
                     rs1_addr_o  = rs1;
                     rs2_addr_o  = 'b0;
                     op_1_o      = rs1_data_i;
@@ -42,7 +42,14 @@ module id (
                     wd_addr_o   = rd;
                     reg_wen     = 1'b1;
                 end
-                
+                `INST_SLLI, `INST_SRI: begin
+                    rs1_addr_o  = rs1;
+                    rs2_addr_o  = 'b0;
+                    op_1_o      = rs1_data_i;
+                    op_2_o      = {27'b0, rs2};
+                    wd_addr_o   = rd;
+                    reg_wen     = 1'b1;
+                end
                 default: begin
                     rs1_addr_o  = 'b0;
                     rs2_addr_o  = 'b0;

@@ -3,8 +3,8 @@ module ex (
     // from id_ex
     input [31:0]        inst_i,
     input [31:0]        inst_addr_i,
-    input [31:0]        rs1_data_i,
-    input [31:0]        rs2_data_i,
+    input [31:0]  rs1_data_i,
+    input [31:0]  rs2_data_i,
     input [4:0]         rd_addr_i,
     input wire          rd_wen_i,
     // to regs
@@ -24,11 +24,15 @@ module ex (
     wire [6:0] func7;
 
     wire op1_i_equal_op2_i;
+    wire op1_i_less_than_op2_i_signed;
+    wire op1_i_less_than_op2_i_unsigned;
     wire[31:0] jump_imm;
 
-    assign {func7, rs2, rs1, func3, rd, opcode} = inst_i;
-    assign op1_i_equal_op2_i = (rs1_data_i == rs2_data_i);
-    assign jump_imm = {{20{func7[6]}}, rd[0], func7[5:0], rd[4:1], 1'b0};
+    assign {func7, rs2, rs1, func3, rd, opcode}   = inst_i;
+    assign op1_i_equal_op2_i                      = (rs1_data_i == rs2_data_i);
+    assign op1_i_less_than_op2_i_signed           = ($signed(rs1_data_i) < $signed(rs2_data_i));
+    assign op1_i_less_than_op2_i_unsigned         = (rs1_data_i < rs2_data_i);
+    assign jump_imm                               = {{20{func7[6]}}, rd[0], func7[5:0], rd[4:1], 1'b0};
 
   always @(*) begin
       case(opcode)
@@ -41,6 +45,46 @@ module ex (
                     rd_addr_o = rd_addr_i;
                     rd_data_o = rs1_data_i + rs2_data_i;
                     rd_wen_o = rd_wen_i;
+                end
+                `INST_SLTI: begin
+                    rd_addr_o = rd_addr_i;
+                    rd_data_o = {31'b0, op1_i_less_than_op2_i_signed};
+                    rd_wen_o = rd_wen_i;
+                end
+                `INST_SLTIU: begin
+                    rd_addr_o = rd_addr_i;
+                    rd_data_o = {31'b0, op1_i_less_than_op2_i_unsigned};
+                    rd_wen_o = rd_wen_i;
+                end
+                `INST_XORI: begin
+                    rd_addr_o = rd_addr_i;
+                    rd_data_o = rs1_data_i ^ rs2_data_i;
+                    rd_wen_o = rd_wen_i;
+                end
+                `INST_ORI: begin
+                    rd_addr_o = rd_addr_i;
+                    rd_data_o = rs1_data_i | rs2_data_i;
+                    rd_wen_o = rd_wen_i;
+                end
+                `INST_ANDI: begin
+                    rd_addr_o = rd_addr_i;
+                    rd_data_o = rs1_data_i & rs2_data_i;
+                    rd_wen_o = rd_wen_i;
+                end
+                `INST_SLLI: begin
+                    rd_addr_o = rd_addr_i;
+                    rd_data_o = rs1_data_i << rs2_data_i;
+                    rd_wen_o = rd_wen_i;
+                end
+                `INST_SRI: begin
+                    rd_addr_o = rd_addr_i;
+                    rd_wen_o = rd_wen_i;
+                    if(func7[5] == 1'b1) begin
+                        // 输入默认是unsigned，这里如果不转为signed，>>>将无法识别符号位，按照无符号数处理
+                        rd_data_o = $signed(rs1_data_i)>>>rs2_data_i;
+                    end else begin
+                        rd_data_o = rs1_data_i>>rs2_data_i;
+                    end
                 end
                 default: begin
                     rd_addr_o = 'b0;
