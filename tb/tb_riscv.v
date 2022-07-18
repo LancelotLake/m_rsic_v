@@ -20,7 +20,7 @@ module tb_riscv (
 
         #30; 
         rst_n <= 'b1;
-		#10000 $finish;
+		#15000 $finish;
     end
 
     always #10 clk <= ~clk;
@@ -29,7 +29,7 @@ module tb_riscv (
 	initial begin
         // 这里是16进制的读入，需要将readmemb改为readmemh
 		// 读取测试文件
-		$readmemh("../tb/inst_txt/rv32ui-p-srai.txt", tb_riscv.m_riscv_soc.m_rom.rom_mem);
+		$readmemh("../tb/inst_txt/rv32ui-p-jalr.txt", tb_riscv.m_riscv_soc.m_rom.rom_mem);
 		// $display("x27 register value is %d",tb_riscv_add.m_riscv_soc.m_rom.rom_mem[0]);
 		// $display("x27 register value is %d",tb_riscv_add.m_riscv_soc.m_rom.rom_mem[1]);
 		// $display("x27 register value is %d",tb_riscv_add.m_riscv_soc.m_rom.rom_mem[2]);

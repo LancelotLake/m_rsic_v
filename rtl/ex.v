@@ -111,17 +111,17 @@ module ex (
                     end
                 end 
                 `INST_SLL: begin
-                    rd_data_o = rs1_data_i << rs2_data_i;
+                    rd_data_o = rs1_data_i << rs2_data_i[4:0];
                     rd_addr_o = rd_addr_i;
                     rd_wen_o = rd_wen_i;
                 end
                 `INST_SLT: begin
-                    rd_data_o = op1_i_less_than_op2_i_signed;
+                    rd_data_o = {31'b0, op1_i_less_than_op2_i_signed};
                     rd_addr_o = rd_addr_i;
                     rd_wen_o = rd_wen_i;
                 end
                 `INST_SLTU: begin
-                    rd_data_o = op1_i_less_than_op2_i_unsigned;
+                    rd_data_o = {31'b0, op1_i_less_than_op2_i_unsigned};
                     rd_addr_o = rd_addr_i;
                     rd_wen_o = rd_wen_i;
                 end
@@ -134,9 +134,9 @@ module ex (
                     rd_addr_o = rd_addr_i;
                     rd_wen_o = rd_wen_i;
                     if(func7 == 7'b010_0000) begin
-                        rd_data_o = $signed(rs1_data_i) >>> rs2_data_i;
+                        rd_data_o = $signed(rs1_data_i) >>> rs2_data_i[4:0];
                     end else begin
-                        rd_data_o = rs1_data_i >> rs2_data_i;
+                        rd_data_o = rs1_data_i >> rs2_data_i[4:0];
                     end
                 end
                 `INST_OR: begin
@@ -171,6 +171,26 @@ module ex (
                     jump_ena_o  = op1_i_equal_op2_i;
                     hold_flag_o = 1'b0;
                 end
+                 `INST_BLT: begin
+                    jump_addr_o = (inst_addr_i + jump_imm) & {32{op1_i_less_than_op2_i_signed}};
+                    jump_ena_o  = op1_i_less_than_op2_i_signed;
+                    hold_flag_o = 1'b0;
+                 end
+                 `INST_BGE: begin
+                    jump_addr_o = (inst_addr_i + jump_imm) & {32{~op1_i_less_than_op2_i_signed}};
+                    jump_ena_o  = ~op1_i_less_than_op2_i_signed;
+                    hold_flag_o = 1'b0;
+                 end
+                 `INST_BLTU: begin
+                    jump_addr_o = (inst_addr_i + jump_imm) & {32{op1_i_less_than_op2_i_unsigned}};
+                    jump_ena_o  = op1_i_less_than_op2_i_unsigned;
+                    hold_flag_o = 1'b0;
+                 end
+                 `INST_BGEU: begin
+                    jump_addr_o = (inst_addr_i + jump_imm) & {32{~op1_i_less_than_op2_i_unsigned}};
+                    jump_ena_o  = ~op1_i_less_than_op2_i_unsigned;
+                    hold_flag_o = 1'b0;
+                 end
                 default: begin
                     jump_addr_o = 32'b0;
                     jump_ena_o  = 1'b0;
@@ -187,8 +207,26 @@ module ex (
             rd_data_o = rs1_data_i;
             rd_wen_o = rd_wen_i;
         end
+        `INST_AUIPC: begin
+            jump_addr_o = 32'b0;
+            jump_ena_o  = 1'b0;
+            hold_flag_o = 1'b0;
+
+            rd_addr_o = rd_addr_i;
+            rd_data_o = rs1_data_i + inst_addr_i;
+            rd_wen_o = rd_wen_i;
+        end
         `INST_JAL: begin
             jump_addr_o = rs1_data_i + inst_addr_i;
+            jump_ena_o  = 1'b1;
+            hold_flag_o = 1'b0;
+
+            rd_addr_o = rd_addr_i;
+            rd_data_o = inst_addr_i+32'h4;
+            rd_wen_o = rd_wen_i;
+        end
+        `INST_JALR: begin
+            jump_addr_o = rs1_data_i + rs2_data_i;
             jump_ena_o  = 1'b1;
             hold_flag_o = 1'b0;
 
